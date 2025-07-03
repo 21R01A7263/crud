@@ -10,8 +10,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getUsers } from '@/server/users';
-import { Button } from './ui/button';
-import { Pencil, Trash2Icon } from 'lucide-react';
 import DeleteUser from './ui/deleteuser';
 import EditUser from './ui/edituser';
 

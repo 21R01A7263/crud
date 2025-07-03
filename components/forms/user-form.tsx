@@ -61,7 +61,7 @@ const UserForm = React.memo(function UserForm({ user }: UserFormProps) {
       
       form.reset();
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error(user ? "Failed to update user" : "Failed to create user");
     } finally {
       setLoading(false);
