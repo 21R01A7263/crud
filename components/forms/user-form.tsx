@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { toast } from 'sonner';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
@@ -10,13 +10,13 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { createUser } from '@/server/users';
+import { User } from '@/db/schema';
+import { createUser, updateUser } from '@/server/users';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
@@ -24,18 +24,22 @@ const formSchema = z.object({
   email: z.string().email()
 });
 
-export default function UserForm() {
+interface UserFormProps {
+  user?: User;
+}
+
+const UserForm = React.memo(function UserForm({ user }: UserFormProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: '',
-      email: '',
+      username: user?.username || '',
+      email: user?.email || '',
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
     setLoading(true);
     try {
       console.log(values);
@@ -43,16 +47,26 @@ export default function UserForm() {
           ...values,
           password: '1234'
       }
-      await createUser(userData);
+      if(user){
+        await updateUser({
+          ...userData,
+          id: user.id,
+        });
+        toast("User has been updated.")
+      }
+      else{
+        await createUser(userData);
+        toast("User has been created.")
+      }
+      
       form.reset();
-      toast("User has been created.")
       router.refresh();
     } catch (error) {
-      toast.error("Failed to create user");
+      toast.error(user ? "Failed to update user" : "Failed to create user");
     } finally {
       setLoading(false);
     }
-  }
+  }, [user, form, router]);
 
   return (
     <Form {...form}>
@@ -84,8 +98,12 @@ export default function UserForm() {
             </FormItem>
           )}
         />
-        <Button disabled={loading} type='submit'>Submit</Button>
+        <Button disabled={loading} type='submit'>
+          {user ? 'Update' : 'Create'}
+        </Button>
       </form>
     </Form>
   );
-}
+});
+
+export default UserForm;

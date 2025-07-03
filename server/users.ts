@@ -24,11 +24,11 @@ export async function createUser(userData: Omit<User, 'id' | 'createdAt' | 'upda
     }
 }
 
-export async function deleteUser(userData : Omit<User, 'email' | 'username' | 'password' | 'createdAt' | 'updatedAt'>) {
+export async function deleteUser(userId: string) {
     try {
         await db
             .delete(users)
-            .where(eq(users.id, userData.id))
+            .where(eq(users.id, userId))
             .returning();
         
     } catch (error) {
@@ -51,4 +51,4 @@ export async function updateUser(
         throw new Error('Failed to update user');
     }
 }
-    
+

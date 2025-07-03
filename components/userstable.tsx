@@ -10,8 +10,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getUsers } from '@/server/users';
+import { Button } from './ui/button';
+import { Pencil, Trash2Icon } from 'lucide-react';
+import DeleteUser from './ui/deleteuser';
+import EditUser from './ui/edituser';
 
-export default async function UsersTable() {
+const UsersTable = React.memo(async function UsersTable() {
   const users = await getUsers();
   return (
     <Table>
@@ -21,7 +25,7 @@ export default async function UsersTable() {
           <TableHead className='w-[100px]'>Email</TableHead>
           <TableHead>Username</TableHead>
           <TableHead>Created At</TableHead>
-          <TableHead className='text-right'>Updated At</TableHead>
+          <TableHead className='text-right'>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -31,11 +35,14 @@ export default async function UsersTable() {
             <TableCell>{user.username}</TableCell>
             <TableCell>{user.createdAt?.toLocaleString()}</TableCell>
             <TableCell className='text-right'>
-              {user.updatedAt?.toLocaleString()}
+              <EditUser user={user} />
+              <DeleteUser userId={user.id} />
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
   );
-}
+});
+
+export default UsersTable;
